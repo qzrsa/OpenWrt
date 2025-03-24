@@ -1,4 +1,4 @@
-<div align="center">
+   <div align="center">
 <img width="768" src="https://github.com/qzrsa/MyOpenWrt/blob/main/images/openwrt.png?raw=true"/>
 <h1>OpenWrt — 自用固件云编译</h1>
 
@@ -17,21 +17,19 @@
 
 
 ## 固件特色 [![](https://img.shields.io/badge/-本项目固件特色-FFFFFF.svg)](#固件特色-)
-1. 固件 x86-64-new 每天定时自动编译，以确保获得最新体验
+1. 固件 x86-64-new 每月1日定时自动编译，以确保获得最新体验
 2. 集成中文版 netdata 实时监控插件，小白也能轻松看懂系统概况
 3. 集成 Docker 服务，可在 OpenWrt 内自由部署 Docker 应用
 4. 集成在线用户插件，可查看所有在线用户 IP 地址与实时速率等
 
 
 ## 固件版本 [![](https://img.shields.io/badge/-本项目版本-FFFFFF.svg)](#固件版本-)
-- x86-64-new              内核版本为最新版,每天由GitHub Actions自动更新。
-- x86-64-new-simplify     内核版本为最新版,精简版,只有一个主题。插件需要自己安装。
-- x86-64-stable           内核版本为5.15版本。自用，不定期更新。
+- x86-64-stable           内核版本为5.15版本。每月1日由GitHub Actions自动更新，期间不定期更新。
 ## 固件下载 [![](https://img.shields.io/badge/-编译状态及下载链接-FFFFFF.svg)](#固件下载-)
 点击下表中 [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?style=flat&logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) 即可跳转到该设备固件下载页面
 | 平台+设备名称 | 固件编译状态 | 配置文件 | 固件下载 |
 | :-------------: | :-------------: | :-------------: | :-------------: |
-| [![](https://img.shields.io/badge/OpenWrt-x86-64%E4%BD%8D.svg?logo=openwrt)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/x86-64-new.yml) | [![](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-new.yml/badge.svg)](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-new.yml) | [![](https://img.shields.io/badge/编译-配置-orange.svg?logo=apache-spark)](https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-new.config) | [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) |
+| [![](https://img.shields.io/badge/OpenWrt-x86-64%E4%BD%8D.svg?logo=openwrt)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/x86-64-stable.yml) | [![](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-new.yml/badge.svg)](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-stable.yml) | [![](https://img.shields.io/badge/编译-配置-orange.svg?logo=apache-spark)](https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-stable.config) | [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) |
 
 
 
