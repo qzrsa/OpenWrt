@@ -88,7 +88,18 @@ jobs:
         ccache: false
         mixkey: ${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
         prefix: ${{ env.OPENWRT_PATH }}
+        
 
+
+
+    - name: Modify feeds.conf.default
+      run: 
+        cd openwrt
+        sed -i 's/^#src-git luci https:\/\/github.com\/coolsnowwolf\/luci/src-git luci https:\/\/github.com\/coolsnowwolf\/luci/g' feeds.conf.default
+        sed -i 's/^src-git luci https:\/\/github.com\/coolsnowwolf\/luci/#src-git luci https:\/\/github.com\/coolsnowwolf\/luci/g' feeds.conf.default
+
+
+    
     - name: Install Feeds
       run: |
         cd $OPENWRT_PATH
