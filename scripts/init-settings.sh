@@ -4,6 +4,10 @@
 uci set luci.main.mediaurlbase='/luci-static/argon'
 uci commit luci
 
+# 修改主机名称为 OPENWRT
+uci set system.@system[0].hostname='OPENWRT'
+uci commit system
+
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
 
