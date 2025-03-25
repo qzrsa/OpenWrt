@@ -13,11 +13,6 @@ sed -i 's/LEDE/OPENWRT/g' package/base-files/files/bin/config_generate
 sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.config
 
 
-# 修改feeds.conf.default文件
-sed -i 's/^#src-git luci https:\/\/github.com\/coolsnowwolf\/luci/src-git luci https:\/\/github.com\/coolsnowwolf\/luci/g' feeds.conf.default
-sed -i 's/^src-git luci https:\/\/github.com\/coolsnowwolf\/luci/#src-git luci https:\/\/github.com\/coolsnowwolf\/luci/g' feeds.conf.default
-
-
 # 增加软件源
 sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
 sed -i '$a src-git smpackage https://github.com/kenzok8/small-package' feeds.conf.default
@@ -101,6 +96,11 @@ find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/
 
 # 修改内核版本为 5.15
 sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=5.15/' target/linux/x86/Makefile
+
+
+# 修改feeds.conf.default文件
+sed -i 's/^#src-git luci https:\/\/github.com\/coolsnowwolf\/luci/src-git luci https:\/\/github.com\/coolsnowwolf\/luci/g' feeds.conf.default
+sed -i 's/^src-git luci https:\/\/github.com\/coolsnowwolf\/luci/#src-git luci https:\/\/github.com\/coolsnowwolf\/luci/g' feeds.conf.default
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
