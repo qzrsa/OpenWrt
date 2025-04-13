@@ -248,7 +248,6 @@ clone_all lua https://github.com/sbwml/luci-app-alist
 clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
 git_clone https://github.com/sbwml/packages_lang_golang golang
 
-
 git_clone https://github.com/ximiTech/luci-app-msd_lite
 git_clone https://github.com/ximiTech/msd_lite
 
@@ -261,12 +260,8 @@ clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/xiaorouji/openwrt-passwall
 
 # Themes
-git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
 git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
 git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
-clone_dir https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom luci-theme-infinityfreedom-ng
-clone_dir https://github.com/haiibo/packages luci-theme-opentomcat
-
 
 # 开始加载个人设置
 begin_time=$(date '+%H:%M:%S')
@@ -313,7 +308,7 @@ sed -i "s/'C'/'Core '/g; s/'T '/'Thread '/g" package/lean/autocore/files/x86/aut
 # sed -i '/samba4/s/^/#/' package/lean/default-settings/files/zzz-default-settings
 
 # 在线用户
-git_sparse_clone main https://github.com/haiibo/packages luci-app-onliner
+git_sparse_clone main https://github.com/qzrsa/packages luci-app-onliner
 sed -i '$i uci set nlbwmon.@nlbwmon[0].refresh_interval=2s' package/lean/default-settings/files/zzz-default-settings
 sed -i '$i uci commit nlbwmon' package/lean/default-settings/files/zzz-default-settings
 chmod 755 package/luci-app-onliner/root/usr/share/onliner/setnlbw.sh
