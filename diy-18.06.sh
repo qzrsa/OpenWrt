@@ -240,6 +240,11 @@ destination_dir="package/A"
 
 color cy "添加&替换插件"
 
+
+# 移除要替换的包
+rm -rf feeds/luci/applications/luci-app-netdata
+rm -rf package/luci-app-ssr-plus
+
 # 添加额外插件
 git_clone https://github.com/kongfl888/luci-app-adguardhome
 clone_all https://github.com/sirpdboy/luci-app-ddns-go
@@ -253,6 +258,8 @@ git_clone https://github.com/ximiTech/msd_lite
 
 clone_all https://github.com/linkease/istore-ui
 clone_all https://github.com/linkease/istore luci
+
+git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
 
 # 科学上网插件
 clone_all https://github.com/fw876/helloworld
