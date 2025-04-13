@@ -11,7 +11,7 @@ on:
         required: true
         default: '18.06'
         type: choice
-        options: [18.06, 23.05]
+        options: [18.06]
 
       target:
         description: '选择要编译的机型'
@@ -69,7 +69,7 @@ jobs:
 #      fail-fast: false
 #      matrix:
 #        target: [x86-64]
-#        branch: [18.06, 23.05]
+#        branch: [18.06]
 
     env:
 #      TARGET_DEVICE: ${{ github.event.inputs.target }}
