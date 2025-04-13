@@ -17,7 +17,7 @@ repo=$(cat /etc/openwrt_release | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print
 sed -i "s/DISTRIB_DESCRIPTION=.*/DISTRIB_DESCRIPTION='$repo R$(date +%y.%m.%d)'/g" /etc/openwrt_release
 
 # 修改主机名为 openwrt
-uci set system.@system[0].hostname='openwrt'
+uci set system.@system[0].hostname='OpenWrt'
 uci commit system
 
 exit 0
