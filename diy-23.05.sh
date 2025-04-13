@@ -253,8 +253,6 @@ clone_all https://github.com/brvphoenix/wrtbwmon
 clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/xiaorouji/openwrt-passwall
-clone_all https://github.com/xiaorouji/openwrt-passwall2
-clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 
 # Themes
 git_clone https://github.com/kiddin9/luci-theme-edge
