@@ -77,7 +77,6 @@ jobs:
       PART_SIZE: ${{ github.event.inputs.partsize }}
       TOOLCHAIN: ${{ github.event.inputs.toolchain }}
       ZSH_TOOL: ${{ github.event.inputs.zsh_tool }}
-      CLASH_KERNEL: ${{ github.event.inputs.openclash }}
       CONFIG_FILE: configs/${{ github.event.inputs.target }}-${{ github.event.inputs.source }}.config
       DIY_SCRIPT: diy-${{ github.event.inputs.source }}.sh
       RELEASE_TAG: ${{ github.event.inputs.target }}-${{ github.event.inputs.source }}
