@@ -256,7 +256,7 @@ clone_all https://github.com/linkease/istore-ui
 clone_all https://github.com/linkease/istore luci
 
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
-git_clone main https://github.com/qzrsa/packages luci-app-luci-app-netdata
+git_clone main https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
 
 # 科学上网插件
 # clone_all https://github.com/fw876/helloworld
