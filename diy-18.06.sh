@@ -171,10 +171,6 @@ begin_time=$(date '+%H:%M:%S')
 [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp -f $GITHUB_WORKSPACE/$CONFIG_FILE .config
 make defconfig 1>/dev/null 2>&1
 
-# 删除Ksmbd相关文件
-rm -rf package/*/ksmbd  
-rm -rf feeds/*/ksmbd     
-status "删除Ksmbd相关文件"
 
 # 源仓库与分支
 SOURCE_REPO=$(basename $REPO_URL)
