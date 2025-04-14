@@ -262,7 +262,6 @@ git_clone https://github.com/ximiTech/msd_lite
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
 git_clone main https://github.com/qzrsa/packages luci-app-netdata
 
-git_clone https://github.com/1715173329/gowebdav
 
 # 科学上网插件
 # clone_all https://github.com/fw876/helloworld
