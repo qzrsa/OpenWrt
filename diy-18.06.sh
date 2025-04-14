@@ -278,11 +278,6 @@ begin_time=$(date '+%H:%M:%S')
 [ -e $GITHUB_WORKSPACE/files ] && mv $GITHUB_WORKSPACE/files files
 
 
-# 移除要替换的包
-rm -rf feeds/luci/applications/luci-app-netdata
-
-
-
 # 设置固件rootfs大小
 if [ $PART_SIZE ]; then
     sed -i '/ROOTFS_PARTSIZE/d' $GITHUB_WORKSPACE/$CONFIG_FILE
