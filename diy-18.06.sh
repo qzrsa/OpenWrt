@@ -234,6 +234,12 @@ begin_time=$(date '+%H:%M:%S')
 ./scripts/feeds install -a 1>/dev/null 2>&1
 status "更新&安装插件"
 
+
+# 移除要替换的包
+rm -rf feeds/luci/applications/luci-app-netdata
+rm -rf package/luci-app-ssr-plus
+
+
 # 创建插件保存目录
 destination_dir="package/A"
 [ -d $destination_dir ] || mkdir -p $destination_dir
