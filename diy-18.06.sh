@@ -183,9 +183,6 @@ DEVICE_TARGET=$TARGET_NAME-$SUBTARGET_NAME
 echo "DEVICE_TARGET=$DEVICE_TARGET" >>$GITHUB_ENV
 
 # 内核版本
-# KERNEL=$(grep -oP 'KERNEL_PATCHVER:=\K[^ ]+' target/linux/$TARGET_NAME/Makefile)
-# KERNEL_VERSION=$(awk -F '-' '/KERNEL/{print $2}' include/kernel-$KERNEL | awk '{print $1}')
-# echo "KERNEL_VERSION=$KERNEL_VERSION" >>$GITHUB_ENV
 sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=5.15/' target/linux/x86/Makefile
 KERNEL_VERSION="5.15"
 echo "KERNEL_VERSION=$KERNEL_VERSION" >>$GITHUB_ENV
@@ -237,7 +234,7 @@ status "更新&安装插件"
 
 # 移除要替换的包
 rm -rf feeds/luci/applications/luci-app-netdata
-rm -rf package/luci-app-ssr-plus
+# rm -rf package/luci-app-ssr-plus
 
 
 # 创建插件保存目录
@@ -260,10 +257,9 @@ git_clone https://github.com/ximiTech/msd_lite
 
 clone_all https://github.com/linkease/istore-ui
 clone_all https://github.com/linkease/istore luci
-# git clone --depth=1 https://github.com/linkease/istore
 
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
-git_clone main https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
+git_clone main https://github.com/qzrsa/packages luci-app-netdata
 
 # 科学上网插件
 # clone_all https://github.com/fw876/helloworld
@@ -295,11 +291,12 @@ fi
 sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.config
 
 # 设置 root 用户密码为空
-# sed -i '/CYXluq4wUazHjmCDBCqXF/d' package/lean/default-settings/files/zzz-default-settings 
+sed -i '/CYXluq4wUazHjmCDBCqXF/d' package/lean/default-settings/files/zzz-default-settings 
+
 
 # 更改 Argon 主题背景
-# cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-cp -f $GITHUB_WORKSPACE/images/bg1.jpg package/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+
 
 # x86 型号只显示 CPU 型号
 sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
@@ -318,7 +315,6 @@ sed -i "s/'C'/'Core '/g; s/'T '/'Thread '/g" package/lean/autocore/files/x86/aut
 
 # 取消对 samba4 的菜单调整
 # sed -i '/samba4/s/^/#/' package/lean/default-settings/files/zzz-default-settings
-
 
 
 # 修复 Makefile 路径
