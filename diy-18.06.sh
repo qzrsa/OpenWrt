@@ -166,6 +166,12 @@ echo "OPENWRT_PATH=$PWD" >>$GITHUB_ENV
 # 设置luci版本为18.06
 sed -i '/luci/s/^#//; /openwrt-23.05/s/^/#/' feeds.conf.default
 
+
+# 添加源
+echo "src-git qzrs https://github.com/qzrsa/packages" >> feeds.conf.default
+
+
+
 # 开始生成全局变量
 begin_time=$(date '+%H:%M:%S')
 [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp -f $GITHUB_WORKSPACE/$CONFIG_FILE .config
