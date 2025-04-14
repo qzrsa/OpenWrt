@@ -232,10 +232,8 @@ begin_time=$(date '+%H:%M:%S')
 ./scripts/feeds install -a 1>/dev/null 2>&1
 status "更新&安装插件"
 
-
 # 移除要替换的包
 rm -rf feeds/luci/applications/luci-app-netdata
-# rm -rf package/luci-app-ssr-plus
 
 
 # 创建插件保存目录
@@ -261,6 +259,8 @@ git_clone https://github.com/ximiTech/msd_lite
 
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
 git_clone main https://github.com/qzrsa/packages luci-app-netdata
+git_clone main https://github.com/qzrsa/packages luci-app-gowebdav
+
 
 
 # 科学上网插件
@@ -276,6 +276,12 @@ git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
 begin_time=$(date '+%H:%M:%S')
 
 [ -e $GITHUB_WORKSPACE/files ] && mv $GITHUB_WORKSPACE/files files
+
+
+# 移除要替换的包
+rm -rf feeds/luci/applications/luci-app-netdata
+
+
 
 # 设置固件rootfs大小
 if [ $PART_SIZE ]; then
