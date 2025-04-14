@@ -235,7 +235,7 @@ jobs:
         name: ${{ env.DATE }} for ${{ env.DEVICE_TARGET }}
         allowUpdates: true
         removeArtifacts: true
-        tag: ${{ env.RELEASE_TAG }}
+        tag: ${{ env.FIRMWARE_TAG }}-${{ env.FILE_DATE }}
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
