@@ -79,7 +79,7 @@ jobs:
       ZSH_TOOL: ${{ github.event.inputs.zsh_tool }}
       CONFIG_FILE: configs/${{ github.event.inputs.target }}-${{ github.event.inputs.source }}.config
       DIY_SCRIPT: diy-${{ github.event.inputs.source }}.sh
-      RELEASE_TAG: ${{ github.event.inputs.target }}-${{ github.event.inputs.source }}-${{ github.run_id }}
+      RELEASE_TAG: ${{ github.event.inputs.target }}-${{ github.event.inputs.source }}
       TOOLCHAIN_TAG: toolchain
       UPLOAD_BIN_DIR: false
       TZ: Asia/Shanghai
