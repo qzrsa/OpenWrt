@@ -247,6 +247,9 @@ status "更新&安装插件"
 # 移除要替换的包
 rm -rf feeds/luci/applications/luci-app-netdata
 
+# 删除 netdata 包
+rm -rf feeds/packages/netdata
+
 
 # 创建插件保存目录
 destination_dir="package/A"
