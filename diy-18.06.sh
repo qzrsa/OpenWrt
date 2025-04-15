@@ -238,13 +238,6 @@ begin_time=$(date '+%H:%M:%S')
 ./scripts/feeds install -a 1>/dev/null 2>&1
 status "更新&安装插件"
 
-# 删除 ksmbd 相关包
-rm -rf feeds/luci/applications/luci-app-ksmbd
-rm -rf feeds/luci/applications/luci-i18n-ksmbd-*
-rm -rf packages/x86_64/luci/luci-app-ksmbd*
-rm -rf packages/x86_64/luci/luci-i18n-ksmbd-*
-
-
 
 # 创建插件保存目录
 destination_dir="package/A"
