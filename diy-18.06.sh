@@ -239,16 +239,11 @@ begin_time=$(date '+%H:%M:%S')
 status "更新&安装插件"
 
 # 删除 ksmbd 相关包
-# rm -rf feeds/luci/applications/luci-app-ksmbd
-# rm -rf feeds/luci/applications/luci-i18n-ksmbd-*
-# rm -rf packages/x86_64/luci/luci-app-ksmbd*
-# rm -rf packages/x86_64/luci/luci-i18n-ksmbd-*
+rm -rf feeds/luci/applications/luci-app-ksmbd
+rm -rf feeds/luci/applications/luci-i18n-ksmbd-*
+rm -rf packages/x86_64/luci/luci-app-ksmbd*
+rm -rf packages/x86_64/luci/luci-i18n-ksmbd-*
 
-# 移除要替换的包
-rm -rf feeds/luci/applications/luci-app-netdata
-
-# 删除 netdata 包
-rm -rf feeds/packages/netdata
 
 
 # 创建插件保存目录
@@ -273,7 +268,6 @@ git_clone https://github.com/ximiTech/msd_lite
 # clone_all https://github.com/linkease/istore luci
 
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
-git_clone main https://github.com/qzrsa/packages luci-app-netdata
 git_clone main https://github.com/qzrsa/packages luci-app-gowebdav
 
 
