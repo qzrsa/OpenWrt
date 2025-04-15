@@ -273,7 +273,7 @@ git_clone main https://github.com/qzrsa/packages luci-app-gowebdav
 
 
 # 科学上网插件
-# clone_all https://github.com/fw876/helloworld
+clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/xiaorouji/openwrt-passwall
 
