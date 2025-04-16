@@ -156,7 +156,7 @@ jobs:
       id: toolchain
       run: |
         cd $OPENWRT_PATH
-        make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
+        FORCE=1 make toolchain/compile -j$(nproc) || FORCE=1 make toolchain/compile -j1 V=s
         $GITHUB_WORKSPACE/$DIY_SCRIPT
 
     - name: Delete Old Toolchain
