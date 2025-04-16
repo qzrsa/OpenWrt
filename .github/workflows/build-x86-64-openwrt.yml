@@ -102,6 +102,7 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
         echo "==========================硬盘信息=========================="
         echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
 #    - name: Free Disk Space
 #      if: github.event.inputs.free_disk == 'true'
 #      uses: jlumbroso/free-disk-space@main
@@ -128,6 +129,7 @@ jobs:
         sudo -E apt-get -y autoremove --purge
         sudo -E apt-get -y clean) &
         sudo timedatectl set-timezone "$TZ"
+
     - name: Combine Disks
       run: |
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
@@ -145,6 +147,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo mount -o compress=zstd $LV_NAME /workdir
         sudo chown -R runner:runner /workdir && df -hT
+
     - name: Load Compile Script
       run: chmod +x $DIY_SCRIPT && ./$DIY_SCRIPT
 
@@ -155,6 +158,7 @@ jobs:
         cd $OPENWRT_PATH
         make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
         $GITHUB_WORKSPACE/$DIY_SCRIPT
+
     - name: Delete Old Toolchain
       if: steps.toolchain.conclusion == 'success' || env.OUTPUT_RELEASE == 'true'
       uses: mknejp/delete-release-assets@v1
@@ -182,6 +186,7 @@ jobs:
         make package/download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+
     - name: Compile Firmware
       id: compile
       run: |
@@ -192,7 +197,7 @@ jobs:
         make -j$(nproc) || make -j1 V=s
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >>$GITHUB_ENV
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >>$GITHUB_ENV
-        echo "COMMIT_AUTHOR=作者:丶曲終人散ゞ" >> $GITHUB_ENV
+
     - name: Upload Bin Directory
       if: steps.compile.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true'
       uses: actions/upload-artifact@main
@@ -214,6 +219,7 @@ jobs:
         sleep 3s && rm -rf packages sha256sums *.buildinfo *.bin *.json *rootfs.img.gz
         sed '/^$/d' $OPENWRT_PATH/.config >config.txt
         echo "FIRMWARE_PATH=$PWD" >>$GITHUB_ENV
+
     - name: Upload Firmware To Artifact
       if: steps.compile.conclusion == 'success' && github.event.inputs.artifact == 'true'
       uses: actions/upload-artifact@main
@@ -239,7 +245,7 @@ jobs:
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🚀 内核版本: ${{ env.KERNEL_VERSION }}
           - 🌐 默认地址: ${{ env.DEFAULT_IP }}
-          - 🔑 默认密码: 无
+          - 🔑 默认密码: password
           ### 🧊 固件版本
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
           - ${{ env.COMMIT_AUTHOR }}
