@@ -197,6 +197,7 @@ jobs:
         make -j$(nproc) || make -j1 V=s
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >>$GITHUB_ENV
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >>$GITHUB_ENV
+        echo "COMMIT_AUTHOR=作者:丶曲終人散ゞ" >> $GITHUB_ENV
 
     - name: Upload Bin Directory
       if: steps.compile.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true'
