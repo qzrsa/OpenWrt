@@ -1,5 +1,5 @@
    <div align="center">
-<img width="768" src="https://github.com/qzrsa/MyOpenWrt/blob/main/images/openwrt.png?raw=true"/>
+
 <h1>OpenWrt — 自用固件云编译</h1>
 
 
@@ -10,7 +10,7 @@
 ## 项目说明 [![](https://img.shields.io/badge/-项目基本介绍-FFFFFF.svg)](#项目说明-)
 - 固件构成：[![Lean](https://img.shields.io/badge/Lede-Lean-ff69b4.svg?style=flat&logo=appveyor)](https://github.com/coolsnowwolf/lede) [![P3TERX](https://img.shields.io/badge/OpenWrt-P3TERX-blueviolet.svg?style=flat&logo=appveyor)](https://github.com/P3TERX/Actions-OpenWrt) [![Haiibo](https://img.shields.io/badge/Build-Haiibo-32C955.svg?style=flat&logo=appveyor)](https://github.com/haiibo/OpenWrt)
 - 项目使用 Github Actions 拉取 [Lean](https://github.com/coolsnowwolf/lede) 的 Openwrt 源码仓库进行云编译
-- 固件默认管理地址：`192.168.11.1` 默认用户：`root` 默认密码：``
+- 固件默认管理地址：`192.168.11.1` 默认用户：`root` 默认密码：空
 - 固件集成的所有 ipk 插件全部打包在 Packages 文件中，可以在 [Releases](https://github.com/qzrsa/OpenWrt/releases) 内进行下载
 - 项目编译的固件插件为最新版本，最新版插件可能有 BUG，如果之前使用稳定则无需追新
 - 第一次使用请采用全新安装，避免出现升级失败以及其他一些可能的 BUG
@@ -28,7 +28,7 @@
 点击下表中 [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?style=flat&logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) 即可跳转到该设备固件下载页面
 | 平台+设备名称 | 固件编译状态 | 配置文件 | 固件下载 |
 | :-------------: | :-------------: | :-------------: | :-------------: |
-| [![](https://img.shields.io/badge/OpenWrt-x86-64%E4%BD%8D.svg?logo=openwrt)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/x86-64-stable.yml) | [![](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-stable.yml/badge.svg)](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-stable.yml) | [![](https://img.shields.io/badge/编译-配置-orange.svg?logo=apache-spark)](https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-stable.config) | [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) |
+| [![](https://img.shields.io/badge/OpenWrt-x86-64%E4%BD%8D.svg?logo=openwrt)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/build-x86-64-openwrt.yml) | [![](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-stable.yml/badge.svg)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/build-x86-64-openwrt.yml) | [![](https://img.shields.io/badge/编译-配置-orange.svg?logo=apache-spark)]([https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-stable.config](https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-18.06.config)) | [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) |
 
 
 
@@ -70,10 +70,8 @@
 　├── PassWall<br/>
 　├── AdGuard Home<br/>
 　├── 动态 DNS<br/>
-　├── 网络唤醒<br/>
 　├── UPnP<br/>
 　├── KMS服务器<br/>   　
-　└── Docker CE
 </details>
 <details>
 <summary><b>├── Docker</b></summary>
@@ -92,7 +90,6 @@
 </details>
 <details>
 <summary><b>├── VPN</b></summary>
-　├── IPSec VPN 服务器<br/>
 　└── ZeroTier
 </details>
 <details>
@@ -103,8 +100,7 @@
 　├── IP/MAC 绑定<br/>
 　├── 静态路由<br/>
 　├── 防火墙<br/>
-　├── 诊断<br/>
-　└── Turbo ACC 网络加速
+　└── 诊断
 </details>
 <details>
 <summary><b>├── 带宽监控</b></summary>
