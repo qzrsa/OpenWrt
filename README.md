@@ -28,7 +28,7 @@
 点击下表中 [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?style=flat&logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) 即可跳转到该设备固件下载页面
 | 平台+设备名称 | 固件编译状态 | 配置文件 | 固件下载 |
 | :-------------: | :-------------: | :-------------: | :-------------: |
-| [![](https://img.shields.io/badge/OpenWrt-x86-64%E4%BD%8D.svg?logo=openwrt)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/build-x86-64-openwrt.yml) | [![](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-stable.yml/badge.svg)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/build-x86-64-openwrt.yml) | [![](https://img.shields.io/badge/编译-配置-orange.svg?logo=apache-spark)]([https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-stable.config](https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-18.06.config)) | [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) |
+| [![](https://img.shields.io/badge/OpenWrt-x86-64%E4%BD%8D.svg?logo=openwrt)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/build-x86-64-openwrt.yml) | [![](https://github.com/qzrsa/OpenWrt/actions/workflows/x86-64-stable.yml/badge.svg)](https://github.com/qzrsa/OpenWrt/blob/main/.github/workflows/build-x86-64-openwrt.yml) | [![](https://img.shields.io/badge/编译-配置-orange.svg?logo=apache-spark)]([https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-18.06.config](https://github.com/qzrsa/OpenWrt/blob/main/configs/x86-64-18.06.config)) | [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) |
 
 
 
