@@ -246,7 +246,7 @@ jobs:
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🚀 内核版本: ${{ env.KERNEL_VERSION }}
           - 🌐 默认地址: ${{ env.DEFAULT_IP }}
-          - 🔑 默认密码: password
+          - 🔑 默认密码: 
           ### 🧊 固件版本
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
           - ${{ env.COMMIT_AUTHOR }}
