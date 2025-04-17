@@ -17,7 +17,7 @@
 
 
 ## 固件特色 [![](https://img.shields.io/badge/-本项目固件特色-FFFFFF.svg)](#固件特色-)
-1. 固件 x86-64-new 每月1日定时自动编译，以确保获得最新体验
+1. 固件 x86-64 每月1日定时自动编译，以确保获得最新体验
 2. 集成 Docker 服务，可在 OpenWrt 内自由部署 Docker 应用
 3. 集成在线用户插件，可查看所有在线用户 IP 地址与实时速率等
 
@@ -68,10 +68,11 @@
 <details>
 <summary><b>├── 服务</b></summary>
 　├── PassWall<br/>
-　├── AdGuard Home<br/>
+　├── MosDns<br/>
+　├── DDNS-GO<br/>
 　├── 动态 DNS<br/>
-　├── UPnP<br/>
-　├── KMS服务器<br/>   　
+　├── KMS服务器<br/> 
+　└── UPnP<br/>
 </details>
 <details>
 <summary><b>├── Docker</b></summary>
@@ -86,6 +87,7 @@
 <details>
 <summary><b>├── 网络存储</b></summary>
 　├── Alist 文件列表<br/>
+　├── WebDav<br/>
 　└── 网络共享
 </details>
 <details>
@@ -108,7 +110,7 @@
 　├── 配置<br/>
 　├── 备份<br/>
 　├── 网速监控<br/>
-　└── 用量
+　└── 流量监控
 </details>
 　└── <b>退出</b>
 </details>
