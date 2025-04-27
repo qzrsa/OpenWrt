@@ -68,6 +68,7 @@
 <details>
 <summary><b>├── 服务</b></summary>
 　├── PassWall<br/>
+　├── AdGuard Home<br/>
 　├── MosDns<br/>
 　├── DDNS-GO<br/>
 　├── 动态 DNS<br/>
