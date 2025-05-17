@@ -168,7 +168,6 @@ sed -i '/luci/s/^#//; /openwrt-23.05/s/^/#/' feeds.conf.default
 
 
 # 添加源
-echo "src-git qzrs https://github.com/qzrsa/packages" >> feeds.conf.default
 
 
 
