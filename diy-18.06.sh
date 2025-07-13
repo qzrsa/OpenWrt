@@ -261,7 +261,6 @@ git_clone https://github.com/ximiTech/msd_lite
 
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
 git_clone main https://github.com/qzrsa/packages luci-app-gowebdav
-git_clone main https://github.com/qzrsa/packages luci-app-jellyfin
 
 
 # 科学上网插件
