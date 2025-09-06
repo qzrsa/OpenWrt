@@ -163,12 +163,10 @@ ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 [ -d openwrt ] && cd openwrt || exit
 echo "OPENWRT_PATH=$PWD" >>$GITHUB_ENV
 
-# 设置luci版本为18.06
-sed -i '/luci/s/^#//; /openwrt-23.05/s/^/#/' feeds.conf.default
 
-
-
-# 添加源
+# 添加唯一的luci 18.06源
+sed -i '/luci/d' feeds.conf.default
+echo "src-git luci https://github.com/coolsnowwolf/luci.git" >> feeds.conf.default
 
 
 
