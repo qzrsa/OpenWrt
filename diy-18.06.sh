@@ -164,10 +164,7 @@ ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 echo "OPENWRT_PATH=$PWD" >>$GITHUB_ENV
 
 # 设置luci版本为18.06
-
-
-sed -i '/openwrt-23.05/d' feeds.conf.default
-sed -i '0,/^src-git luci/{/src-git luci/!d}' feeds.conf.default
+sed -i '/luci/s/^#//; /openwrt-23.05/s/^/#/' feeds.conf.default
 
 
 
