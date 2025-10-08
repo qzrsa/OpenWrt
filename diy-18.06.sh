@@ -270,6 +270,10 @@ clone_all https://github.com/xiaorouji/openwrt-passwall
 git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
 git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
 
+# NPS内网穿透
+git_clone https://github.com/djylb/nps-openwrt
+
+
 # 开始加载个人设置
 begin_time=$(date '+%H:%M:%S')
 
