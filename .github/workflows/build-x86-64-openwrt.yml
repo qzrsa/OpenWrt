@@ -1,186 +1,258 @@
-name: OpenWrt x86/64 自动编译系统
+name: build x86/64 openwrt
 
 on:
+#  schedule: [cron: 30 14 */3 * *]
+#  watch:
+#    types: started
   workflow_dispatch:
     inputs:
-      源码版本:
-        description: '选择OpenWrt版本'
+      source:
+        description: '选择要编译的LUCI版本'
         required: true
-        default: '24.10'
+        default: '24.10'  # 修改为24.10
         type: choice
-        options: [24.10]
+        options: [24.10]  # 修改为24.10
 
-      目标设备:
-        description: '选择编译设备'
+      target:
+        description: '选择要编译的机型'
         required: true
         default: 'x86-64'
         type: choice
         options: [x86-64]
 
-      默认IP:
-        description: '设置登录IP地址'
+      ip:
+        description: '设置默认登录IP'
         required: false
         default: '192.168.11.1'
 
-      分区大小:
-        description: '设置rootfs分区大小(MB)'
+      partsize:
+        description: '设置rootfs大小'
         required: false
         default: '800'
 
-      工具链缓存:
-        description: '启用工具链缓存加速'
+#      free_disk:
+#        description: '清理释放磁盘空间'
+#        required: false
+#        default: false
+#        type: boolean
+
+      toolchain:
+        description: '使用toolchain缓存'
         required: false
         default: true
         type: boolean
 
-      终端工具:
-        description: '安装ZSH终端工具'
+      zsh_tool:
+        description: '预设zsh终端工具'
         required: false
         default: true
         type: boolean
 
-      上传产物:
+      artifact:
         description: '上传固件到Artifact'
         required: false
         default: true
         type: boolean
 
-      发布版本:
+      release:
         description: '上传固件到Releases'
         required: false
         default: true
         type: boolean
 
 jobs:
-  编译任务:
+  build:
     runs-on: ubuntu-22.04
-    name: 编译 ${{ github.event.inputs.目标设备 }} ${{ github.event.inputs.源码版本 }}
-    
+    name: build ${{ github.event.inputs.target }} ${{ github.event.inputs.source }}
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        target: [x86-64]
+#        branch: [24.10]  # 更新为24.10
+
     env:
-      默认IP: ${{ github.event.inputs.默认IP }}
-      分区大小: ${{ github.event.inputs.分区大小 }}
-      启用工具链: ${{ github.event.inputs.工具链缓存 }}
-      安装终端工具: ${{ github.event.inputs.终端工具 }}
-      配置文件: configs/${{ github.event.inputs.目标设备 }}-${{ github.event.inputs.源码版本 }}.config
-      编译脚本: diy-${{ github.event.inputs.源码版本 }}.sh
-      工具链标签: toolchain
-      上传二进制: false
-      时区: Asia/Shanghai
-      源码分支: openwrt-24.10
-      # 新增路径变量
-      工作目录: ${{ github.workspace }}
-      OpenWrt路径: ${{ github.workspace }}/openwrt
+#      TARGET_DEVICE: ${{ github.event.inputs.target }}
+      DEFAULT_IP: ${{ github.event.inputs.ip }}
+      PART_SIZE: ${{ github.event.inputs.partsize }}
+      TOOLCHAIN: ${{ github.event.inputs.toolchain }}
+      ZSH_TOOL: ${{ github.event.inputs.zsh_tool }}
+      CONFIG_FILE: configs/${{ github.event.inputs.target }}-${{ github.event.inputs.source }}.config
+      DIY_SCRIPT: diy-${{ github.event.inputs.source }}.sh
+      TOOLCHAIN_TAG: toolchain
+      UPLOAD_BIN_DIR: false
+      TZ: Asia/Shanghai
+      REPO_BRANCH: openwrt-24.10  # 新增分支声明
 
     steps:
-    - name: 获取源代码
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-        fetch-depth: 0
-        
-    - name: 系统性能检查
-      run: |
-        echo "⚠️ 性能提示：插件过多可能导致编译失败"
-        echo "==========================CPU信息=========================="
-        echo "CPU核心数: $(nproc)"
-        echo "CPU型号: $(lscpu | grep "Model name" | cut -d: -f2 | sed 's/^ *//')"
-        echo "==========================内存信息=========================="
-        free -h
-        echo "==========================磁盘信息=========================="
-        df -hT
+    - name: Checkout
+      uses: actions/checkout@main
 
-    - name: 初始化环境
+    - name: Check Server Performance
+      run: |
+        echo "警告⚠"
+        echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+        echo -e "已知CPU型号(降序): 7763，8370C，8272CL，8171M，E5-2673\n"
+        echo "==========================CPU信息=========================="
+        echo "CPU物理数量: $(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo "CPU线程数量: $(nproc)"
+        echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
+        echo "==========================内存信息=========================="
+        echo "已安装内存详细信息:"
+        echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
+        echo "==========================硬盘信息=========================="
+        echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
+#    - name: Free Disk Space
+#      if: github.event.inputs.free_disk == 'true'
+#      uses: jlumbroso/free-disk-space@main
+#      with:
+#        tool-cache: true
+#        android: true
+#        dotnet: true
+#        haskell: true
+#        large-packages: true
+#        docker-images: true
+#        swap-storage: true
+
+    - name: Initialization Environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        # 清理系统资源
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        
-        # 安装必要依赖
-        sudo apt-get update
-        sudo apt-get install -y zstd build-essential clang libssl3 liblua5.4-dev
-        
-        # 设置时区
-        sudo timedatectl set-timezone "$时区"
-        
-        # 设置文件权限
-        chmod +x $编译脚本
-        chmod +x scripts/*
+        docker rmi $(docker images -q)
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
+        sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+        (sudo -E apt-get -y update
+        sudo -E apt-get -y install clang $(curl -fsSL is.gd/depends_ubuntu_2204) libssl3 liblua5.4-dev  # 新增依赖
+        sudo -E systemctl daemon-reload
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get -y clean) &
+        sudo timedatectl set-timezone "$TZ"
 
-    - name: 验证配置文件
+    - name: Combine Disks
       run: |
-        echo "=== 文件验证 ==="
-        echo "检查编译脚本: $编译脚本"
-        [ -f "$编译脚本" ] || (echo "错误：编译脚本不存在"; exit 1)
-        
-        echo "检查配置文件: $配置文件"
-        [ -f "$配置文件" ] || (echo "错误：配置文件不存在"; exit 1)
-        
-        echo "=== 配置预览 ==="
-        head -n 20 $配置文件
+        MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
+        sudo fallocate -l $MNT_SIZE /mnt/mnt.img
+        MNT_NAME=$(sudo losetup -Pf --show /mnt/mnt.img)
+        sudo pvcreate -f $MNT_NAME
+        ROOT_SIZE=$((($(df --block-size=1024 --output=avail / | tail -1) - 1024*1024*4) * 1024))
+        sudo fallocate -l $ROOT_SIZE /root.img
+        ROOT_NAME=$(sudo losetup -Pf --show /root.img)
+        sudo pvcreate -f $ROOT_NAME
+        sudo vgcreate actions $MNT_NAME $ROOT_NAME
+        sudo lvcreate -n disk -l 100%FREE actions
+        LV_NAME=$(sudo lvscan | awk -F "'" '{print $2}')
+        sudo mkfs.btrfs -L combinedisk $LV_NAME
+        sudo mkdir -p /workdir
+        sudo mount -o compress=zstd $LV_NAME /workdir
+        sudo chown -R runner:runner /workdir && df -hT
 
-    - name: 执行编译脚本
+    - name: Load Compile Script
+      run: chmod +x $DIY_SCRIPT && ./$DIY_SCRIPT
+
+    - name: Compile Toolchain
+      if: env.REBUILD_TOOLCHAIN == 'true'
+      id: toolchain
       run: |
-        echo "开始编译 ${{ github.event.inputs.目标设备 }} 设备固件"
-        ./$编译脚本
-        
-    - name: 编译固件
-      id: firmware_compile
+        cd $OPENWRT_PATH
+        FORCE=1 make toolchain/compile -j$(nproc) || FORCE=1 make toolchain/compile -j1 V=s
+        $GITHUB_WORKSPACE/$DIY_SCRIPT
+
+    - name: Delete Old Toolchain
+      if: steps.toolchain.conclusion == 'success' || env.OUTPUT_RELEASE == 'true'
+      uses: mknejp/delete-release-assets@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ env.TOOLCHAIN_TAG }}
+        assets: '${{ env.SOURCE_REPO }}-${{ env.LITE_BRANCH }}-${{ env.DEVICE_TARGET }}*'
+        fail-if-no-assets: false
+        fail-if-no-release: false
+
+    - name: Upload Toolchain To Release
+      if: steps.toolchain.conclusion == 'success' || env.OUTPUT_RELEASE == 'true'
+      uses: softprops/action-gh-release@v2
+      with:
+        name: toolchain-cache
+        tag_name: ${{ env.TOOLCHAIN_TAG }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: output/*
+        body: OpenWrt 工具链缓存
+
+    - name: Download DL Package
       run: |
-        cd $OpenWrt路径
-        echo "使用 $(nproc) 线程编译"
+        cd $OPENWRT_PATH
+        # make download -j$(nproc)
+        make package/download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: Compile Firmware
+      id: compile
+      run: |
+        cd $OPENWRT_PATH
+        mkdir -p files/etc/uci-defaults
+        cp $GITHUB_WORKSPACE/scripts/init-settings.sh files/etc/uci-defaults/99-init-settings
+        echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 V=s
-        
-        # 设置环境变量
-        echo "编译日期=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
-        echo "发布时间=$(date +"%Y%m%d-%H%M")" >> $GITHUB_ENV
-        echo "固件版本=$(cat version.date)" >> $GITHUB_ENV
-        echo "发布标签=${{ github.event.inputs.目标设备 }}-${{ github.event.inputs.源码版本 }}-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y.%m.%d")" >>$GITHUB_ENV
+        echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >>$GITHUB_ENV
+        echo "COMMIT_AUTHOR=作者:丶曲終人散ゞ" >> $GITHUB_ENV
+        echo "RELEASE_TAG=${{ github.event.inputs.target }}-${{ github.event.inputs.source }}-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+        echo "OPENWRT_VERSION=$(cat version.date)" >> $GITHUB_ENV  # 新增版本信息
 
-    - name: 整理固件文件
-      if: steps.firmware_compile.conclusion == 'success'
+
+    - name: Upload Bin Directory
+      if: steps.compile.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ env.SOURCE_REPO }}-${{ env.LITE_BRANCH }}-${{ env.DEVICE_TARGET }}-bin-${{ env.FILE_DATE }}
+        path: ${{ env.OPENWRT_PATH }}/bin
+
+    - name: Organize Files
+      if: steps.compile.conclusion == 'success'
       run: |
-        cd $OpenWrt路径/bin/targets/*/*
-        echo "=== 固件文件列表 ==="
-        ls -lh
-        
-        # 创建压缩包
+        df -hT
+        echo "==============================="
+        ls $OPENWRT_PATH/bin/targets/*/*
+        echo "==============================="
+        cd $OPENWRT_PATH/bin/targets/*/*
+        cat config.buildinfo
+        cp -rf $OPENWRT_PATH/bin/packages/* packages
         tar -zcf packages.tar.gz packages
-        echo "固件目录=$PWD" >> $GITHUB_ENV
+        sleep 3s && rm -rf packages sha256sums *.buildinfo *.bin *.json *rootfs.img.gz
+        sed '/^$/d' $OPENWRT_PATH/.config >config.txt
+        echo "FIRMWARE_PATH=$PWD" >>$GITHUB_ENV
 
-    - name: 上传到产物(Artifacts)
-      if: steps.firmware_compile.conclusion == 'success' && github.event.inputs.上传产物 == 'true'
-      uses: actions/upload-artifact@v3
+    - name: Upload Firmware To Artifact
+      if: steps.compile.conclusion == 'success' && github.event.inputs.artifact == 'true'
+      uses: actions/upload-artifact@main
       with:
-        name: openwrt-${{ github.event.inputs.目标设备 }}-固件
-        path: ${{ env.固件目录 }}
-        retention-days: 7
+        name: ${{ env.SOURCE_REPO }}-${{ env.LITE_BRANCH }}-${{ env.DEVICE_TARGET }}-firmware-${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE_PATH }}
 
-    - name: 发布到版本(Releases)
-      if: steps.firmware_compile.conclusion == 'success' && github.event.inputs.发布版本 == 'true'
-      uses: softprops/action-gh-release@v1
+    - name: Upload Firmware To Release
+      if: steps.compile.conclusion == 'success' && github.event.inputs.release == 'true'
+      uses: ncipollo/release-action@main
       with:
-        tag_name: ${{ env.发布标签 }}
-        name: "OpenWrt ${{ env.固件版本 }} - ${{ github.event.inputs.目标设备 }}"
+        name: ${{ env.DATE }} for ${{ env.DEVICE_TARGET }}
+        allowUpdates: true
+        removeArtifacts: true
+        tag: ${{ env.RELEASE_TAG }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
-          ### 🚀 OpenWrt 自动编译版本
-          **设备架构**: ${{ github.event.inputs.目标设备 }}
-          **源码版本**: ${{ github.event.inputs.源码版本 }}
-          **编译日期**: ${{ env.编译日期 }}
-          
-          **默认登录**: 
-          - IP地址: ${{ github.event.inputs.默认IP }}
-          - 用户名: root
-          - 密码: (无)
-          
-          **包含功能**:
-          - 最新安全更新
-          - 优化网络性能
-          - 支持Docker容器
-        files: |
-          ${{ env.固件目录 }}/*.img.gz
-          ${{ env.固件目录 }}/*.rootfs.tar.gz
-          ${{ env.固件目录 }}/packages.tar.gz
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          **This is ${{ env.SOURCE_REPO }} firmware for ${{ env.DEVICE_TARGET }}**
+          ### 📒 固件信息
+          - 💻 平台架构: ${{ env.DEVICE_TARGET }}
+          - ⚽ 固件源码: ${{ env.REPO_URL }}
+          - 💝 源码分支: ${{ env.REPO_BRANCH }}
+          - 🚀 内核版本: ${{ env.KERNEL_VERSION }}
+          - 🌐 默认地址: ${{ env.DEFAULT_IP }}
+          - 🔑 默认密码: 
+          - 📦 OpenWrt版本: ${{ env.OPENWRT_VERSION }}  # 新增版本显示
+          ### 🧊 固件版本
+          - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
+          - ${{ env.COMMIT_AUTHOR }}
+          - ${{ env.COMMIT_DATE }}
+          - ${{ env.COMMIT_MESSAGE }}
+          - ${{ env.COMMIT_HASH }}  注释一下
