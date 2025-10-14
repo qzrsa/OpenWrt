@@ -1,8 +1,10 @@
 #!/bin/bash
+# OpenWrt 24.10 编译自定义脚本
+# 适配官方 OpenWrt 24.10 分支和 LUCI 24.10 界面
 
-# 打包Toolchain
+# 打包 Toolchain
 if [[ $REBUILD_TOOLCHAIN = 'true' ]]; then
-    echo -e "\e[1;33m开始打包toolchain目录\e[0m"
+    echo -e "\e[1;33m开始打包 toolchain 目录\e[0m"
     cd $OPENWRT_PATH
     sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
     [ -d ".ccache" ] && (ccache=".ccache"; ls -alh .ccache)
@@ -16,6 +18,7 @@ fi
 
 [ -d $GITHUB_WORKSPACE/output ] || mkdir $GITHUB_WORKSPACE/output
 
+# 颜色输出函数
 color() {
     case $1 in
         cr) echo -e "\e[1;31m$2\e[0m" ;;
@@ -27,6 +30,7 @@ color() {
     esac
 }
 
+# 操作状态显示
 status() {
     local check=$? end_time=$(date '+%H:%M:%S') total_time
     total_time="==> 用时 $[$(date +%s -d $end_time) - $(date +%s -d $begin_time)] 秒"
@@ -40,17 +44,17 @@ status() {
     fi
 }
 
+# 查找目录函数
 find_dir() {
     find $1 -maxdepth 3 -type d -name $2 -print -quit 2>/dev/null
 }
 
+# 信息打印函数
 print_info() {
     printf "%s %-40s %s %s %s\n" $1 $2 $3 $4 $5
-    # read -r param1 param2 param3 param4 param5 <<< $1
-    # printf "%s %-40s %s %s %s\n" $param1 $param2 $param3 $param4 $param5
 }
 
-# 添加整个源仓库(git clone)
+# 添加整个源仓库
 git_clone() {
     local repo_url branch target_dir current_dir
     if [[ "$1" == */* ]]; then
@@ -147,10 +151,11 @@ clone_all() {
     rm -rf $temp_dir
 }
 
-# 设置编译源码与分支
-REPO_URL="https://github.com/coolsnowwolf/lede"
+# ================== 核心设置 ==================
+# 使用 OpenWrt 官方仓库和 24.10 分支
+REPO_URL="https://github.com/openwrt/openwrt"
+REPO_BRANCH="openwrt-24.10"
 echo "REPO_URL=$REPO_URL" >>$GITHUB_ENV
-REPO_BRANCH="master"
 echo "REPO_BRANCH=$REPO_BRANCH" >>$GITHUB_ENV
 
 # 开始拉取编译源码
@@ -163,18 +168,14 @@ ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 [ -d openwrt ] && cd openwrt || exit
 echo "OPENWRT_PATH=$PWD" >>$GITHUB_ENV
 
-
-# 添加唯一的luci 18.06源
+# 添加 OpenWrt 官方 LUCI 24.10 源
 sed -i '/luci/d' feeds.conf.default
-echo "src-git luci https://github.com/coolsnowwolf/luci.git" >> feeds.conf.default
-
-
+echo "src-git luci https://github.com/openwrt/luci.git;openwrt-24.10" >> feeds.conf.default
 
 # 开始生成全局变量
 begin_time=$(date '+%H:%M:%S')
 [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp -f $GITHUB_WORKSPACE/$CONFIG_FILE .config
 make defconfig 1>/dev/null 2>&1
-
 
 # 源仓库与分支
 SOURCE_REPO=$(basename $REPO_URL)
@@ -187,12 +188,11 @@ SUBTARGET_NAME=$(awk -F '"' '/CONFIG_TARGET_SUBTARGET/{print $2}' .config)
 DEVICE_TARGET=$TARGET_NAME-$SUBTARGET_NAME
 echo "DEVICE_TARGET=$DEVICE_TARGET" >>$GITHUB_ENV
 
-# 内核版本
-sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=5.15/' target/linux/x86/Makefile
-KERNEL_VERSION="5.15"
+# 内核版本（OpenWrt 24.10 默认使用 6.x，无需强制修改）
+KERNEL_VERSION=$(grep 'KERNEL_PATCHVER:' target/linux/$TARGET_NAME/Makefile | cut -d= -f2)
 echo "KERNEL_VERSION=$KERNEL_VERSION" >>$GITHUB_ENV
 
-# Toolchain缓存文件名
+# Toolchain 缓存文件名
 TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
 CACHE_NAME="$SOURCE_REPO-${REPO_BRANCH#*-}-$DEVICE_TARGET-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
@@ -208,20 +208,20 @@ COMMIT_HASH=$(git show -s --date=short --format="hash: %H")
 echo "COMMIT_HASH=$COMMIT_HASH" >>$GITHUB_ENV
 status "生成全局变量"
 
-# 下载并部署Toolchain
+# 下载并部署 Toolchain
 if [[ $TOOLCHAIN = 'true' ]]; then
     cache_xa=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
     cache_xc=$(curl -sL api.github.com/repos/haiibo/toolchain-cache/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
     if [[ $cache_xa || $cache_xc ]]; then
         begin_time=$(date '+%H:%M:%S')
         [ $cache_xa ] && wget -qc -t=3 $cache_xa || wget -qc -t=3 $cache_xc
-        [ -e *.tzst ]; status "下载toolchain缓存文件"
+        [ -e *.tzst ]; status "下载 toolchain 缓存文件"
         [ -e *.tzst ] && {
             begin_time=$(date '+%H:%M:%S')
             tar -I unzstd -xf *.tzst || tar -xf *.tzst
             [ $cache_xa ] || (cp *.tzst $GITHUB_WORKSPACE/output && echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV)
             sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
-            [ -d staging_dir ]; status "部署toolchain编译缓存"
+            [ -d staging_dir ]; status "部署 toolchain 编译缓存"
         }
     else
         echo "REBUILD_TOOLCHAIN=true" >>$GITHUB_ENV
@@ -230,67 +230,60 @@ else
     echo "REBUILD_TOOLCHAIN=true" >>$GITHUB_ENV
 fi
 
-# 开始更新&安装插件
+# 开始更新 & 安装插件
 begin_time=$(date '+%H:%M:%S')
 ./scripts/feeds update -a 1>/dev/null 2>&1
 ./scripts/feeds install -a 1>/dev/null 2>&1
-status "更新&安装插件"
-
+status "更新 & 安装插件"
 
 # 创建插件保存目录
 destination_dir="package/A"
 [ -d $destination_dir ] || mkdir -p $destination_dir
 
-color cy "添加&替换插件"
+color cy "添加 & 替换插件"
 
-
-# 添加额外插件
+# ================== 自定义插件 ==================
+# 核心插件
 git_clone https://github.com/kongfl888/luci-app-adguardhome
 clone_all https://github.com/sirpdboy/luci-app-ddns-go
 
-clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
+# DNS 相关
+clone_all v5 https://github.com/sbwml/luci-app-mosdns
 git_clone https://github.com/sbwml/packages_lang_golang golang
 
+# Web 服务
 git_clone https://github.com/ximiTech/luci-app-msd_lite
 git_clone https://github.com/ximiTech/msd_lite
 
-# clone_all https://github.com/linkease/istore-ui
-# clone_all https://github.com/linkease/istore luci
-
+# 网络工具
 git_clone main https://github.com/qzrsa/packages luci-app-onliner
 git_clone main https://github.com/qzrsa/packages luci-app-gowebdav
 
+# 科学上网插件（使用24.10分支）
+clone_all openwrt-24.10 https://github.com/xiaorouji/openwrt-passwall-packages
+clone_all openwrt-24.10 https://github.com/xiaorouji/openwrt-passwall
 
-# 科学上网插件
-# clone_all https://github.com/qzrsa/helloworld
-clone_all https://github.com/xiaorouji/openwrt-passwall-packages
-clone_all https://github.com/xiaorouji/openwrt-passwall
+# 主题
+git_clone 24.10 https://github.com/jerrykuku/luci-theme-argon
+git_clone 24.10 https://github.com/jerrykuku/luci-app-argon-config
 
-# Themes
-git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
-git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
-
-# NPS内网穿透
+# 内网穿透
 git_clone https://github.com/djylb/nps-openwrt
 
-
-# 开始加载个人设置
+# ================== 个性化设置 ==================
 begin_time=$(date '+%H:%M:%S')
 
+# 加载自定义文件
 [ -e $GITHUB_WORKSPACE/files ] && mv $GITHUB_WORKSPACE/files files
 
-
-# 设置固件rootfs大小
+# 设置固件 rootfs 大小
 if [ $PART_SIZE ]; then
     sed -i '/ROOTFS_PARTSIZE/d' $GITHUB_WORKSPACE/$CONFIG_FILE
     echo "CONFIG_TARGET_ROOTFS_PARTSIZE=$PART_SIZE" >>$GITHUB_WORKSPACE/$CONFIG_FILE
 fi
 
-# 修改默认IP
+# 修改默认 IP
 [ $DEFAULT_IP ] && sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' package/base-files/files/bin/config_generate
-
-# 更改默认 Shell 为 zsh
-# sed -i 's/\/bin\/ash/\/usr\/bin\/zsh/g' package/base-files/files/etc/passwd
 
 # TTYD 免登录
 sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.config
@@ -298,29 +291,13 @@ sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.
 # 设置 root 用户密码为空
 sed -i '/CYXluq4wUazHjmCDBCqXF/d' package/lean/default-settings/files/zzz-default-settings 
 
-
 # 更改 Argon 主题背景
-cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+[ -e $GITHUB_WORKSPACE/images/bg1.jpg ] && \
+    cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
 
-
-# x86 型号只显示 CPU 型号
-sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
-sed -i "s/'C'/'Core '/g; s/'T '/'Thread '/g" package/lean/autocore/files/x86/autocore
-
-# 取消主题默认设置
-# find $destination_dir/luci-theme-*/ -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
-
-
-# 调整 ZeroTier 到 服务 菜单
-# sed -i 's/vpn/services/g; s/VPN/Services/g' feeds/luci/applications/luci-app-zerotier/luasrc/controller/zerotier.lua
-# sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/luasrc/view/zerotier/zerotier_status.htm
-
-# 添加防火墙规则
-# sed -i '/PREROUTING/s/^#//' package/lean/default-settings/files/zzz-default-settings
-
-# 取消对 samba4 的菜单调整
-# sed -i '/samba4/s/^/#/' package/lean/default-settings/files/zzz-default-settings
-
+# x86 型号显示优化
+[ -e package/lean/autocore/files/x86/autocore ] && \
+    sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
 
 # 修复 Makefile 路径
 find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i \
@@ -337,24 +314,24 @@ for e in $(ls -d $destination_dir/luci-*/po feeds/luci/applications/luci-*/po); 
 done
 status "加载个人设置"
 
-
-# 开始下载zsh终端工具
+# ================== 额外工具 ==================
+# 下载 zsh 终端工具
 [[ $ZSH_TOOL = 'true' ]] && {
     begin_time=$(date '+%H:%M:%S')
     chmod +x $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
     $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
-    status "下载zsh终端工具"
+    status "下载 zsh 终端工具"
 }
 
-# 开始下载adguardhome运行内核
+# 下载 adguardhome 运行内核
 [ $CLASH_KERNEL ] && {
     begin_time=$(date '+%H:%M:%S')
     chmod +x $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh
     $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh $CLASH_KERNEL
-    status "下载adguardhome运行内核"
+    status "下载 adguardhome 运行内核"
 }
 
-# 开始更新配置文件
+# 更新配置文件
 begin_time=$(date '+%H:%M:%S')
 [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp -f $GITHUB_WORKSPACE/$CONFIG_FILE .config
 make defconfig 1>/dev/null 2>&1
@@ -362,7 +339,7 @@ status "更新配置文件"
 
 echo -e "$(color cy 当前编译机型) $(color cb $SOURCE_REPO-${REPO_BRANCH#*-}-$DEVICE_TARGET-$KERNEL_VERSION)"
 
-# 更改固件文件名
+# 更改固件文件名（可选）
 # sed -i "s/\$(VERSION_DIST_SANITIZED)/$SOURCE_REPO-${REPO_BRANCH#*-}-$KERNEL_VERSION/" include/image.mk
 # sed -i "/IMG_PREFIX:/ {s/=/=$SOURCE_REPO-${REPO_BRANCH#*-}-$KERNEL_VERSION-\$(shell date +%y.%m.%d)-/}" include/image.mk
 
