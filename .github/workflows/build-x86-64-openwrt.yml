@@ -77,11 +77,11 @@ jobs:
       TOOLCHAIN: ${{ github.event.inputs.toolchain }}
       ZSH_TOOL: ${{ github.event.inputs.zsh_tool }}
       CONFIG_FILE: configs/${{ github.event.inputs.target }}-${{ github.event.inputs.source }}.config
-      DIY_SCRIPT: diy-${{ github.event.inputs.source }}.sh
+      DIY_SCRIPT: diy-24.10.sh
       TOOLCHAIN_TAG: toolchain
       UPLOAD_BIN_DIR: false
       TZ: Asia/Shanghai
-      REPO_BRANCH: openwrt-24.10  # 新增分支声明
+      REPO_BRANCH: openwrt-24.10 
 
     steps:
     - name: Checkout
