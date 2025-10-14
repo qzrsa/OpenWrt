@@ -2,6 +2,11 @@
 # OpenWrt 24.10 编译自定义脚本
 # 适配官方 OpenWrt 24.10 分支和 LUCI 24.10 界面
 
+cd $OPENWRT_PATH
+make clean
+rm -rf tmp/* staging_dir/*
+
+
 # 打包 Toolchain
 if [[ $REBUILD_TOOLCHAIN = 'true' ]]; then
     echo -e "\e[1;33m开始打包 toolchain 目录\e[0m"
