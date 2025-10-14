@@ -9,9 +9,9 @@ on:
       source:
         description: '选择要编译的LUCI版本'
         required: true
-        default: '18.06'
+        default: '24.10'  # 修改为24.10
         type: choice
-        options: [18.06]
+        options: [24.10]  # 修改为24.10
 
       target:
         description: '选择要编译的机型'
@@ -48,7 +48,6 @@ on:
         default: true
         type: boolean
 
-
       artifact:
         description: '上传固件到Artifact'
         required: false
@@ -69,7 +68,7 @@ jobs:
 #      fail-fast: false
 #      matrix:
 #        target: [x86-64]
-#        branch: [18.06]
+#        branch: [24.10]  # 更新为24.10
 
     env:
 #      TARGET_DEVICE: ${{ github.event.inputs.target }}
@@ -82,6 +81,7 @@ jobs:
       TOOLCHAIN_TAG: toolchain
       UPLOAD_BIN_DIR: false
       TZ: Asia/Shanghai
+      REPO_BRANCH: openwrt-24.10  # 新增分支声明
 
     steps:
     - name: Checkout
@@ -123,7 +123,7 @@ jobs:
         sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
         sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
         (sudo -E apt-get -y update
-        sudo -E apt-get -y install clang $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo -E apt-get -y install clang $(curl -fsSL is.gd/depends_ubuntu_2204) libssl3 liblua5.4-dev  # 新增依赖
         sudo -E systemctl daemon-reload
         sudo -E apt-get -y autoremove --purge
         sudo -E apt-get -y clean) &
@@ -198,6 +198,7 @@ jobs:
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >>$GITHUB_ENV
         echo "COMMIT_AUTHOR=作者:丶曲終人散ゞ" >> $GITHUB_ENV
         echo "RELEASE_TAG=${{ github.event.inputs.target }}-${{ github.event.inputs.source }}-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+        echo "OPENWRT_VERSION=$(cat version.date)" >> $GITHUB_ENV  # 新增版本信息
 
 
     - name: Upload Bin Directory
@@ -248,9 +249,10 @@ jobs:
           - 🚀 内核版本: ${{ env.KERNEL_VERSION }}
           - 🌐 默认地址: ${{ env.DEFAULT_IP }}
           - 🔑 默认密码: 
+          - 📦 OpenWrt版本: ${{ env.OPENWRT_VERSION }}  # 新增版本显示
           ### 🧊 固件版本
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
           - ${{ env.COMMIT_AUTHOR }}
           - ${{ env.COMMIT_DATE }}
           - ${{ env.COMMIT_MESSAGE }}
-          - ${{ env.COMMIT_HASH }}
+          - ${{ env.COMMIT_HASH }}  注释一下
