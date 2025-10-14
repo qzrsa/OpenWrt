@@ -265,12 +265,12 @@ git_clone main https://github.com/qzrsa/packages luci-app-onliner
 git_clone main https://github.com/qzrsa/packages luci-app-gowebdav
 
 # 科学上网插件（使用24.10分支）
-clone_all openwrt-24.10 https://github.com/xiaorouji/openwrt-passwall-packages
-clone_all openwrt-24.10 https://github.com/xiaorouji/openwrt-passwall
+git_clone main https://github.com/xiaorouji/openwrt-passwall-packages
+git_clone main https://github.com/xiaorouji/openwrt-passwall
 
 # 主题
-git_clone 24.10 https://github.com/jerrykuku/luci-theme-argon
-git_clone 24.10 https://github.com/jerrykuku/luci-app-argon-config
+git_clone  https://github.com/jerrykuku/luci-theme-argon
+git_clone  https://github.com/jerrykuku/luci-app-argon-config
 
 # 内网穿透
 git_clone https://github.com/djylb/nps-openwrt
