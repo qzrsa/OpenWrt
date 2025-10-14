@@ -255,4 +255,4 @@ jobs:
           - ${{ env.COMMIT_AUTHOR }}
           - ${{ env.COMMIT_DATE }}
           - ${{ env.COMMIT_MESSAGE }}
-          - ${{ env.COMMIT_HASH }}  注释一下
+          - ${{ env.COMMIT_HASH }}  
