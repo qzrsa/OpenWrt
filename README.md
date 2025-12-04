@@ -23,7 +23,7 @@
 
 
 ## 固件版本 [![](https://img.shields.io/badge/-本项目版本-FFFFFF.svg)](#固件版本-)
-固件内核版本为5.15版本。每月1日由GitHub Actions自动更新，期间不定期更新。
+固件版本为24.10版本。每月1日由GitHub Actions自动更新，期间不定期更新。
 ## 固件下载 [![](https://img.shields.io/badge/-编译状态及下载链接-FFFFFF.svg)](#固件下载-)
 点击下表中 [![](https://img.shields.io/badge/下载-链接-blueviolet.svg?style=flat&logo=hack-the-box)](https://github.com/qzrsa/OpenWrt/releases) 即可跳转到该设备固件下载页面
 | 平台+设备名称 | 固件编译状态 | 配置文件 | 固件下载 |
