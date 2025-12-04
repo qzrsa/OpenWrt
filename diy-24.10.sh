@@ -11,7 +11,6 @@ fi
 cd $OPENWRT_PATH || exit 1
 
 # ================== 清理操作（仅首次运行）==================
-# 注意：不要在工具链编译后再次执行 make clean
 if [ ! -f ".cleaned" ]; then
     echo "执行首次清理..."
     make clean
@@ -38,7 +37,6 @@ fi
 [ -d $GITHUB_WORKSPACE/output ] || mkdir -p $GITHUB_WORKSPACE/output
 
 # ================== 辅助函数 ==================
-# 颜色输出函数
 color() {
     case $1 in
         cr) echo -e "\e[1;31m$2\e[0m" ;;
@@ -50,31 +48,25 @@ color() {
     esac
 }
 
-# 操作状态显示
 status() {
     local check=$? end_time=$(date '+%H:%M:%S') total_time
     total_time="==> 用时 $[$(date +%s -d $end_time) - $(date +%s -d $begin_time)] 秒"
     [[ $total_time =~ [0-9]+ ]] || total_time=""
     if [[ $check = 0 ]]; then
-        printf "%-62s %s %s %s %s %s %s %s\n" \
-        $(color cy "$1") [ $(color cg ✔) ] $(echo -e "\e[1m$total_time")
+        printf "%-62s %s %s %s\n" $(color cy "$1") [ $(color cg ✔) ] $(echo -e "\e[1m$total_time")
     else
-        printf "%-62s %s %s %s %s %s %s %s\n" \
-        $(color cy "$1") [ $(color cr ✕) ] $(echo -e "\e[1m$total_time")
+        printf "%-62s %s %s %s\n" $(color cy "$1") [ $(color cr ✕) ] $(echo -e "\e[1m$total_time")
     fi
 }
 
-# 查找目录函数
 find_dir() {
     find $1 -maxdepth 3 -type d -name $2 -print -quit 2>/dev/null
 }
 
-# 信息打印函数
 print_info() {
     printf "%s %-40s %s %s %s\n" $1 $2 $3 $4 $5
 }
 
-# 添加整个源仓库
 git_clone() {
     local repo_url branch target_dir current_dir
     if [[ "$1" == */* ]]; then
@@ -105,7 +97,6 @@ git_clone() {
     fi
 }
 
-# 添加源仓库内的指定目录
 clone_dir() {
     local repo_url branch temp_dir=$(mktemp -d)
     if [[ "$1" == */* ]]; then
@@ -141,7 +132,6 @@ clone_dir() {
     rm -rf $temp_dir
 }
 
-# 添加源仓库内的所有目录
 clone_all() {
     local repo_url branch temp_dir=$(mktemp -d)
     if [[ "$1" == */* ]]; then
@@ -174,14 +164,14 @@ clone_all() {
 # ================== 生成全局变量 ==================
 begin_time=$(date '+%H:%M:%S')
 
-# 加载配置文件
-[ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp -f $GITHUB_WORKSPACE/$CONFIG_FILE .config
-make defconfig 1>/dev/null 2>&1
-
 # 源仓库与分支
 SOURCE_REPO=$(basename ${REPO_URL:-https://github.com/openwrt/openwrt})
 echo "SOURCE_REPO=$SOURCE_REPO" >>$GITHUB_ENV
 echo "LITE_BRANCH=${REPO_BRANCH#*-}" >>$GITHUB_ENV
+
+# 加载配置文件生成平台信息
+[ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp -f $GITHUB_WORKSPACE/$CONFIG_FILE .config
+make defconfig 1>/dev/null 2>&1
 
 # 平台架构
 TARGET_NAME=$(awk -F '"' '/CONFIG_TARGET_BOARD/{print $2}' .config)
@@ -190,40 +180,41 @@ DEVICE_TARGET=$TARGET_NAME-$SUBTARGET_NAME
 echo "DEVICE_TARGET=$DEVICE_TARGET" >>$GITHUB_ENV
 
 # 内核版本
-KERNEL_VERSION=$(grep 'KERNEL_PATCHVER:' target/linux/$TARGET_NAME/Makefile | cut -d= -f2 | tr -d ' ')
+KERNEL_VERSION=$(grep 'KERNEL_PATCHVER:' target/linux/$TARGET_NAME/Makefile 2>/dev/null | cut -d= -f2 | tr -d ' ')
+[ -z "$KERNEL_VERSION" ] && KERNEL_VERSION="6.6"
 echo "KERNEL_VERSION=$KERNEL_VERSION" >>$GITHUB_ENV
 
 # Toolchain 缓存文件名
-TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
+TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain 2>/dev/null || echo "unknown")
 CACHE_NAME="$SOURCE_REPO-${REPO_BRANCH#*-}-$DEVICE_TARGET-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 
 # 源码更新信息
-COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an")
+COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "Unknown")
 echo "COMMIT_AUTHOR=$COMMIT_AUTHOR" >>$GITHUB_ENV
-COMMIT_DATE=$(git show -s --date=short --format="时间: %ci")
+COMMIT_DATE=$(git show -s --date=short --format="时间: %ci" 2>/dev/null || echo "Unknown")
 echo "COMMIT_DATE=$COMMIT_DATE" >>$GITHUB_ENV
-COMMIT_MESSAGE=$(git show -s --date=short --format="内容: %s")
+COMMIT_MESSAGE=$(git show -s --date=short --format="内容: %s" 2>/dev/null || echo "Unknown")
 echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >>$GITHUB_ENV
-COMMIT_HASH=$(git show -s --date=short --format="hash: %H")
+COMMIT_HASH=$(git show -s --date=short --format="hash: %H" 2>/dev/null || echo "Unknown")
 echo "COMMIT_HASH=$COMMIT_HASH" >>$GITHUB_ENV
 status "生成全局变量"
 
-# ================== 下载并部署 Toolchain ==================
+# ================== 检查 Toolchain 缓存 ==================
 if [[ $TOOLCHAIN = 'true' ]]; then
-    cache_xa=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
-    cache_xc=$(curl -sL api.github.com/repos/haiibo/toolchain-cache/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
+    begin_time=$(date '+%H:%M:%S')
+    cache_xa=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases 2>/dev/null | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
+    cache_xc=$(curl -sL api.github.com/repos/haiibo/toolchain-cache/releases 2>/dev/null | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
     if [[ $cache_xa || $cache_xc ]]; then
-        begin_time=$(date '+%H:%M:%S')
         [ $cache_xa ] && wget -qc -t=3 $cache_xa || wget -qc -t=3 $cache_xc
-        [ -e *.tzst ]; status "下载 toolchain 缓存文件"
-        [ -e *.tzst ] && {
+        if [ -e *.tzst ]; then
+            status "下载 toolchain 缓存文件"
             begin_time=$(date '+%H:%M:%S')
             tar -I unzstd -xf *.tzst || tar -xf *.tzst
-            [ $cache_xa ] || (cp *.tzst $GITHUB_WORKSPACE/output && echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV)
+            [ $cache_xa ] || (cp *.tzst $GITHUB_WORKSPACE/output 2>/dev/null && echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV)
             sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
             [ -d staging_dir ]; status "部署 toolchain 编译缓存"
-        }
+        fi
     else
         echo "REBUILD_TOOLCHAIN=true" >>$GITHUB_ENV
     fi
@@ -233,6 +224,11 @@ fi
 
 # ================== 更新 & 安装插件 ==================
 begin_time=$(date '+%H:%M:%S')
+
+# 添加 OpenWrt 官方 LUCI 24.10 源
+sed -i '/luci/d' feeds.conf.default
+echo "src-git luci https://github.com/openwrt/luci.git;openwrt-24.10" >> feeds.conf.default
+
 ./scripts/feeds update -a 1>/dev/null 2>&1
 ./scripts/feeds install -a 1>/dev/null 2>&1
 status "更新 & 安装插件"
@@ -275,16 +271,16 @@ git_clone https://github.com/djylb/nps-openwrt
 begin_time=$(date '+%H:%M:%S')
 
 # 加载自定义文件
-[ -e $GITHUB_WORKSPACE/files ] && mv $GITHUB_WORKSPACE/files files
+[ -e $GITHUB_WORKSPACE/files ] && cp -rf $GITHUB_WORKSPACE/files/* files/ 2>/dev/null
 
 # 设置固件 rootfs 大小
 if [ -n "$PART_SIZE" ]; then
-    sed -i '/ROOTFS_PARTSIZE/d' $GITHUB_WORKSPACE/$CONFIG_FILE
+    sed -i '/ROOTFS_PARTSIZE/d' $GITHUB_WORKSPACE/$CONFIG_FILE 2>/dev/null
     echo "CONFIG_TARGET_ROOTFS_PARTSIZE=$PART_SIZE" >>$GITHUB_WORKSPACE/$CONFIG_FILE
 fi
 
 # 修改默认 IP
-[ -n "$DEFAULT_IP" ] && sed -i "/n) ipad/s/\".*\"/\"$DEFAULT_IP\"/" package/base-files/files/bin/config_generate
+[ -n "$DEFAULT_IP" ] && sed -i "/n) ipad/s/\".*\"/\"$DEFAULT_IP\"/" package/base-files/files/bin/config_generate 2>/dev/null
 
 # TTYD 免登录
 sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.config 2>/dev/null || true
@@ -294,7 +290,8 @@ sed -i '/CYXluq4wUazHjmCDBCqXF/d' package/lean/default-settings/files/zzz-defaul
 
 # 更改 Argon 主题背景
 if [ -e $GITHUB_WORKSPACE/images/bg1.jpg ]; then
-    cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg 2>/dev/null || true
+    mkdir -p feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/
+    cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
 fi
 
 # x86 型号显示优化
@@ -303,9 +300,9 @@ if [ -e package/lean/autocore/files/x86/autocore ]; then
 fi
 
 # 修复 Makefile 路径
-find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i \
+find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" 2>/dev/null | xargs -i sed -i \
     -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
-    -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' {} 2>/dev/null || true
+    -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' {}
 
 # 转换插件语言翻译
 for e in $(ls -d $destination_dir/luci-*/po feeds/luci/applications/luci-*/po 2>/dev/null); do
