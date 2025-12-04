@@ -31,18 +31,19 @@ mkdir -p package/A
 # 3. 拉取 PassWall 依赖包，并锁定到旧版本（解决 geoview 需要 Go 1.24 的问题）
 git clone https://github.com/xiaorouji/openwrt-passwall-packages.git package/A/openwrt-passwall-packages
 
-(
-  cd package/A/openwrt-passwall-packages || exit 0
-  echo "当前 openwrt-passwall-packages 提交："
-  git log -1 --oneline || true
+cd package/A/openwrt-passwall-packages || exit 0
+echo "当前 openwrt-passwall-packages 提交："
+git log -1 --oneline || true
 
-  # 将仓库回退到 geoview 0.1.11 之前的某个旧提交
-  # !!! 把 <OLD_HASH> 替换成你在 GitHub 上选好的那个提交号，如：9f22c6c
-  git reset --hard <OLD_HASH>
+# 将仓库回退到 geoview 0.1.11 之前的某个旧提交
+# !!! 把 YOUR_OLD_COMMIT_HASH_HERE 换成你在 GitHub 上选好的那个提交号，例如 9f22c6c
+git reset --hard YOUR_OLD_COMMIT_HASH_HERE
 
-  echo "已回退到旧提交："
-  git log -1 --oneline || true
-)
+echo "已回退到旧提交："
+git log -1 --oneline || true
+
+# 回到 OpenWrt 源码根目录，继续后续操作
+cd "$OPENWRT_PATH"
 
 # 4. 拉取 PassWall / PassWall2 主程序（不锁或按需锁）
 git clone https://github.com/xiaorouji/openwrt-passwall.git package/A/openwrt-passwall
