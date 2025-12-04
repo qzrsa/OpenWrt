@@ -64,7 +64,7 @@ jobs:
       TOOLCHAIN: ${{ github.event.inputs.toolchain }}
       ZSH_TOOL: ${{ github.event.inputs.zsh_tool }}
       CONFIG_FILE: configs/${{ github.event.inputs.target }}-${{ github.event.inputs.source }}.config
-      DIY_SCRIPT: diy-${{ github.event.inputs.source }}.sh
+      DIY_SCRIPT: scripts/diy-${{ github.event.inputs.source }}.sh
       TOOLCHAIN_TAG: toolchain
       UPLOAD_BIN_DIR: false
       TZ: Asia/Shanghai
