@@ -51,13 +51,13 @@ jobs:
 
     env:
       TARGET: ${{ github.event.inputs.target }}
-      # 固定使用 24.10
       SOURCE: 24.10
+      # OpenWrt 源码放到 /workdir/openwrt
+      OPENWRT_PATH: /workdir/openwrt
       DEFAULT_IP: ${{ github.event.inputs.ip }}
       PART_SIZE: ${{ github.event.inputs.partsize }}
       TOOLCHAIN: ${{ github.event.inputs.toolchain }}
       ZSH_TOOL: ${{ github.event.inputs.zsh_tool }}
-      # 对应的配置文件 & DIY 脚本
       CONFIG_FILE: configs/${{ github.event.inputs.target }}-24.10.config
       DIY_SCRIPT: scripts/diy-24.10.sh
       TOOLCHAIN_TAG: toolchain
@@ -115,6 +115,10 @@ jobs:
         sudo mkdir -p /workdir
         sudo mount -o compress=zstd $LV_NAME /workdir
         sudo chown -R runner:runner /workdir && df -hT
+
+    - name: Clone OpenWrt Source
+      run: |
+        git clone --depth=1 -b openwrt-24.10 https://github.com/openwrt/openwrt.git $OPENWRT_PATH
 
     - name: Load Compile Script
       run: chmod +x $DIY_SCRIPT && ./$DIY_SCRIPT
