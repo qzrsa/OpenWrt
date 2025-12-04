@@ -36,8 +36,8 @@ echo "当前 openwrt-passwall-packages 提交："
 git log -1 --oneline || true
 
 # 将仓库回退到 geoview 0.1.11 之前的某个旧提交
-# !!! 把 YOUR_OLD_COMMIT_HASH_HERE 换成你在 GitHub 上选好的那个提交号，例如 9f22c6c
-git reset --hard YOUR_OLD_COMMIT_HASH_HERE
+# !!! 把 YOUR_OLD_COMMIT_HASH_HERE 换成你在 GitHub 上选好的那个提交号，例如 6ec933a
+git reset --hard 6ec933a419739456707176f37c629e264b1bb343
 
 echo "已回退到旧提交："
 git log -1 --oneline || true
